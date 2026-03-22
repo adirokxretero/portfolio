@@ -12,13 +12,7 @@ using my own imagination and ideas.
 [utopiatokyo.com](https://www.utopiatokyo.com/) — particularly the
 scroll animations, editorial typography, and dark aesthetic.
 
-**How it was built:** 100% vibe coded using
-[Claude](https://claude.ai) and [Cursor](https://cursor.sh) as AI
-coding assistants. Every design decision, layout choice, content, and
-creative direction came from my own vision — the AI helped me execute
-it technically.
-
-> "I had the ideas. The AI wrote the code. The result is entirely mine."
+**Author:** Designed and developed by **Adithya M** — sole maintainer of this repository.
 
 ---
 
