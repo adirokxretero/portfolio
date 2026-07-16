@@ -1,0 +1,167 @@
+---
+import { projects } from '../data/site';
+---
+
+<section class="section" id="work">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <span class="section-title">Selected Projects</span>
+  </div>
+
+  <div class="projects">
+    {
+      projects.map((project) => (
+        <article class="project reveal">
+          <div class="project-media" data-parallax>
+            <img src={project.image} alt={project.imageAlt} loading="lazy" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              {project.meta.map((meta) => (
+                <span>{meta}</span>
+              ))}
+            </div>
+            <h3 class="project-name display">
+              <span class="project-index">{project.index}</span>
+              {project.name}
+            </h3>
+            <p class="project-tagline">{project.tagline}</p>
+            <p class="project-desc">{project.description}</p>
+            <p class="project-detail">{project.detail}</p>
+            <div class="project-stack">
+              {project.stack.map((tech) => (
+                <span class="chip">{tech}</span>
+              ))}
+            </div>
+            <div class="project-links">
+              <a href={project.github} target="_blank" rel="noopener noreferrer" class="btn">
+                GitHub ↗
+              </a>
+              {project.live && (
+                <a
+                  href={project.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn--solid"
+                >
+                  Live Site ↗
+                </a>
+              )}
+              {project.notLive && <span class="project-notlive">Not live yet</span>}
+              {project.team && <span class="project-team">{project.team}</span>}
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4rem, 10vh, 7rem);
+  }
+
+  .project {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .project:nth-child(even) .project-media {
+    order: 2;
+  }
+
+  .project-media {
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    overflow: hidden;
+  }
+
+  .project-media img {
+    width: 100%;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .project:hover .project-media img {
+    transform: scale(1.04);
+  }
+
+  .project-meta {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .project-name {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .project-index {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .project-tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  .project-desc {
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+
+  .project-detail {
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+    max-width: 48ch;
+  }
+
+  .project-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .project-notlive,
+  .project-team {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 820px) {
+    .project {
+      grid-template-columns: 1fr;
+    }
+
+    .project:nth-child(even) .project-media {
+      order: 0;
+    }
+  }
+</style>

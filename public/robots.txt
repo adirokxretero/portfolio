@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adithya-m.in/sitemap-index.xml

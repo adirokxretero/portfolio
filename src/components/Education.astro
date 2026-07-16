@@ -1,0 +1,85 @@
+---
+import { education } from '../data/site';
+---
+
+<section class="section" id="education">
+  <div class="section-head">
+    <span class="section-num">05</span>
+    <span class="section-title">Education &amp; Certifications</span>
+  </div>
+
+  <ol class="edu-list">
+    {
+      education.map((item) => (
+        <li class="edu-item reveal">
+          <span class="edu-period">{item.period}</span>
+          <div class="edu-body">
+            <h3 class="edu-title">{item.title}</h3>
+            <p class="edu-subtitle">{item.subtitle}</p>
+          </div>
+          <span class="edu-badge">{item.badge}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .edu-list {
+    list-style: none;
+  }
+
+  .edu-item {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .edu-item:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .edu-period {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+
+  .edu-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  }
+
+  .edu-subtitle {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+
+  .edu-badge {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 680px) {
+    .edu-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .edu-badge {
+      justify-self: start;
+    }
+  }
+</style>

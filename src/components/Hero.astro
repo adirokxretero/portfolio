@@ -1,0 +1,208 @@
+---
+import { hero, site } from '../data/site';
+---
+
+<section class="hero" id="hero">
+  <p class="hero-status reveal">
+    <span class="hero-dot" aria-hidden="true"></span>
+    {hero.status}
+  </p>
+
+  <h1 class="hero-name display">
+    <span class="hero-line reveal">{hero.firstName}</span>
+    <span class="hero-line hero-line--indent reveal"
+      >{hero.surnamePlain}<em>{hero.surnameAccent}</em></span
+    >
+  </h1>
+
+  <div class="hero-meta">
+    <p class="hero-roles reveal">
+      <span id="typed-role">{hero.roles[0]}</span><span class="hero-caret" aria-hidden="true"
+        >|</span
+      >
+    </p>
+    <p class="hero-loc reveal">{hero.location} · <span>{hero.coords}</span></p>
+  </div>
+
+  <div class="hero-ctas reveal">
+    <a href="#work" class="btn btn--solid">View Work</a>
+    <a href={`mailto:${site.email}`} class="btn">Get In Touch</a>
+  </div>
+
+  <div class="hero-stats reveal">
+    {
+      hero.stats.map((stat) => (
+        <div class="stat">
+          <span class="stat-num" data-count={stat.count}>
+            0
+          </span>
+          <span class="stat-label">{stat.label}</span>
+        </div>
+      ))
+    }
+  </div>
+
+  <p class="hero-scroll" aria-hidden="true">Scroll</p>
+</section>
+
+<script>
+  import { hero } from '../data/site';
+
+  const roles = hero.roles;
+  const el = document.getElementById('typed-role')!;
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let roleIndex = 0;
+    let charIndex = roles[0]!.length;
+    let deleting = true;
+
+    function tick() {
+      const role = roles[roleIndex]!;
+      charIndex += deleting ? -1 : 1;
+      el.textContent = role.slice(0, charIndex);
+
+      let delay = deleting ? 45 : 85;
+      if (deleting && charIndex === 0) {
+        deleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        delay = 350;
+      } else if (!deleting && charIndex === role.length) {
+        deleting = true;
+        delay = 2200;
+      }
+      setTimeout(tick, delay);
+    }
+
+    setTimeout(tick, 2200);
+  }
+</script>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    padding: 7rem var(--gutter) 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .hero-status {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+
+  .hero-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  .hero-name {
+    font-size: clamp(3.2rem, 12vw, 10.5rem);
+    text-transform: uppercase;
+  }
+
+  .hero-line {
+    display: block;
+  }
+
+  .hero-line--indent {
+    margin-left: clamp(1rem, 8vw, 8rem);
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem 3rem;
+    margin-top: 2.25rem;
+  }
+
+  .hero-roles {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+    color: var(--ink);
+  }
+
+  .hero-caret {
+    color: var(--accent);
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .hero-loc {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+  }
+
+  .hero-loc span {
+    color: var(--ink-faint);
+  }
+
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.75rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(2rem, 6vw, 5rem);
+    margin-top: clamp(3rem, 8vh, 5.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat-num {
+    display: block;
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 1.75rem;
+    right: var(--gutter);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    writing-mode: vertical-rl;
+  }
+</style>

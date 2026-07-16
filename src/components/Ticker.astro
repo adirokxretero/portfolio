@@ -1,0 +1,62 @@
+---
+import { tickerItems } from '../data/site';
+
+// duplicated so the marquee loops seamlessly at -50% translate
+const items = [...tickerItems, ...tickerItems];
+---
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    {
+      items.map((item) => (
+        <span class="ticker-item">
+          {item} <i class="ticker-star">✦</i>
+        </span>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .ticker {
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 1.1rem 0;
+  }
+
+  .ticker-track {
+    display: inline-flex;
+    gap: 2.5rem;
+    animation: marquee 30s linear infinite;
+    will-change: transform;
+  }
+
+  .ticker-item {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--ink-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .ticker-star {
+    color: var(--accent);
+    font-style: normal;
+    font-size: 0.8rem;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none;
+    }
+  }
+</style>

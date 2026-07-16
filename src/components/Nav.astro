@@ -1,0 +1,202 @@
+---
+import { navItems, socials } from '../data/site';
+---
+
+<header class="topbar">
+  <a href="#hero" class="logo" aria-label="Home">
+    <span class="logo-prompt">root@adithya</span><span class="logo-path">:~$</span><span
+      class="logo-cmd">./portfolio</span
+    >
+  </a>
+  <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu-overlay">
+    <span class="menu-btn-label">Menu</span>
+    <span class="menu-btn-lines" aria-hidden="true"><i></i><i></i></span>
+  </button>
+</header>
+
+<nav class="menu-overlay" id="menu-overlay" aria-hidden="true">
+  <ul class="menu-list">
+    {
+      navItems.map((item) => (
+        <li>
+          <a href={item.href} class="menu-link" data-menu-close>
+            <span class="menu-num">{item.num}.</span>
+            <span class="menu-label">{item.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="menu-footer">
+    <a href={socials.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+    <a href={socials.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href={socials.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
+  </div>
+</nav>
+
+<div class="scroll-progress" aria-hidden="true"><i id="scroll-progress-bar"></i></div>
+
+<script>
+  const btn = document.getElementById('menu-btn')!;
+  const overlay = document.getElementById('menu-overlay')!;
+
+  function setOpen(open: boolean) {
+    btn.setAttribute('aria-expanded', String(open));
+    overlay.setAttribute('aria-hidden', String(!open));
+    overlay.classList.toggle('is-open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
+  btn.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+  overlay.querySelectorAll('[data-menu-close]').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false));
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+
+  const bar = document.getElementById('scroll-progress-bar')!;
+  addEventListener(
+    'scroll',
+    () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = `${max > 0 ? (scrollY / max) * 100 : 0}%`;
+    },
+    { passive: true }
+  );
+</script>
+
+<style>
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 1.1rem var(--gutter);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    mix-blend-mode: difference;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+
+  .logo-prompt {
+    color: var(--accent);
+  }
+  .logo-path {
+    color: var(--ink-dim);
+  }
+  .logo-cmd {
+    color: var(--ink);
+  }
+
+  .menu-btn {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .menu-btn-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 26px;
+  }
+
+  .menu-btn-lines i {
+    height: 1px;
+    background: var(--ink);
+    transition: transform 0.35s;
+  }
+
+  .menu-btn[aria-expanded='true'] .menu-btn-lines i:first-child {
+    transform: translateY(3px) rotate(45deg);
+  }
+  .menu-btn[aria-expanded='true'] .menu-btn-lines i:last-child {
+    transform: translateY(-3px) rotate(-45deg);
+  }
+
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: var(--bg);
+    padding: 0 var(--gutter);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s, visibility 0.4s;
+  }
+
+  .menu-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .menu-list {
+    list-style: none;
+  }
+
+  .menu-link {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 1.1;
+    color: var(--ink-dim);
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+    padding: 0.35rem 0;
+    transition: color 0.25s, transform 0.25s;
+  }
+
+  .menu-link:hover {
+    color: var(--ink);
+    transform: translateX(0.5rem);
+  }
+
+  .menu-num {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .menu-footer {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    display: flex;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .menu-footer a:hover {
+    color: var(--accent);
+  }
+
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 110;
+  }
+
+  .scroll-progress i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+  }
+</style>

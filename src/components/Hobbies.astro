@@ -1,0 +1,61 @@
+---
+import { hobbies } from '../data/site';
+---
+
+<section class="section" id="more">
+  <div class="section-head">
+    <span class="section-num">06</span>
+    <span class="section-title">Beyond The Screen</span>
+  </div>
+
+  <div class="hobby-grid">
+    {
+      hobbies.map((hobby, i) => (
+        <div class="hobby reveal">
+          <span class="hobby-num">{String(i + 1).padStart(2, '0')}</span>
+          <h3 class="hobby-title">{hobby.title}</h3>
+          <p class="hobby-text">{hobby.text}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* 1px gaps over a --line background read as hairline dividers */
+  .hobby-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .hobby {
+    background: var(--bg);
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+
+  .hobby:hover {
+    background: var(--bg-raised);
+  }
+
+  .hobby-num {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  .hobby-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.4rem;
+    margin: 0.75rem 0 0.6rem;
+  }
+
+  .hobby-text {
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+  }
+</style>

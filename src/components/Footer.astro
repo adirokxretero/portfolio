@@ -1,0 +1,37 @@
+---
+import { socials } from '../data/site';
+---
+
+<footer class="footer">
+  <div class="footer-socials">
+    <a href={socials.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+    <a href={socials.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href={socials.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
+  </div>
+  <p class="footer-copy">© 2026 Adithya M · All rights reserved</p>
+  <a href="#hero" class="footer-top">↑ Back to Top</a>
+</footer>
+
+<style>
+  .footer {
+    padding: 2rem var(--gutter);
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .footer-socials {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer a:hover {
+    color: var(--accent);
+  }
+</style>
