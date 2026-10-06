@@ -1,0 +1,330 @@
+:root {
+  --bg: #050505;
+  --bg-raised: #0d0d0d;
+  --bg-raised2: #111111;
+  --ink: #ede9e3;
+  --ink-dim: rgba(237, 233, 227, 0.72);
+  --ink-faint: rgba(237, 233, 227, 0.45);
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --accent: #ff3232;
+  --accent-glow: rgba(255, 50, 50, 0.18);
+  --cyan: #2fffd4;
+  --cyan-glow: rgba(47, 255, 212, 0.1);
+  --display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --sans: 'DM Sans', 'Helvetica Neue', sans-serif;
+  --mono: 'DM Mono', 'SFMono-Regular', monospace;
+  --gutter: clamp(1.25rem, 5vw, 5rem);
+  --section-pad: clamp(5rem, 12vh, 9rem);
+  --glass: rgba(5, 5, 5, 0.72);
+}
+
+/* light-mode easter egg (toggled via the </> button) */
+body.lm {
+  --bg: #f3f1ec;
+  --bg-raised: #ece9e3;
+  --bg-raised2: #e6e2db;
+  --ink: #3a352f;
+  --ink-dim: rgba(58, 53, 47, 0.72);
+  --ink-faint: rgba(58, 53, 47, 0.52);
+  --line: rgba(73, 63, 54, 0.14);
+  --line-strong: rgba(73, 63, 54, 0.28);
+  --accent: #d84b4b;
+  --accent-glow: rgba(216, 75, 75, 0.14);
+  --cyan: #1a9e82;
+  --cyan-glow: rgba(26, 158, 130, 0.12);
+  --glass: rgba(243, 241, 236, 0.78);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background 0.55s, color 0.55s;
+}
+
+::selection {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* ── Section scaffold ─────────────────────────── */
+.section {
+  padding: var(--section-pad) var(--gutter);
+  border-top: 1px solid var(--line);
+  position: relative;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
+}
+
+.section-num {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 12px var(--accent-glow);
+}
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: var(--ink-dim);
+}
+
+/* ── Big display type (cyber condensed) ───────── */
+.display {
+  font-family: var(--display);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+}
+
+.display em {
+  color: var(--accent);
+  font-style: normal;
+  text-shadow: 0 0 24px var(--accent-glow);
+}
+
+/* ── Buttons & chips ──────────────────────────── */
+.btn {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 0.85rem 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.35s, border-color 0.35s, box-shadow 0.35s;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: translateY(101%);
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: -1;
+}
+
+.btn:hover {
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.btn:hover::before {
+  transform: translateY(0);
+}
+
+.btn--solid {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  white-space: nowrap;
+  border-radius: 4px;
+  padding: 0.4rem 0.9rem;
+  transition: border-color 0.25s, color 0.25s;
+}
+
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Live status dot ──────────────────────────── */
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ── Scroll reveal (hidden only when JS is on) ── */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+html[data-reduced-motion] .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Kokonut-inspired glass cards + shimmer ───── */
+.glass-card {
+  background: color-mix(in srgb, var(--bg-raised) 82%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.05) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.glass-card:hover::after {
+  animation: shimmer 0.9s ease forwards;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+/* Project media RGB slice glitch (Motion toggles .is-glitching) */
+.project-media {
+  position: relative;
+  isolation: isolate;
+}
+
+.project-media.is-glitching::before,
+.project-media.is-glitching::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  z-index: 2;
+}
+
+.project-media.is-glitching::before {
+  clip-path: inset(18% 0 55% 0);
+  transform: translateX(-6px);
+  filter: drop-shadow(-3px 0 #ff3232);
+  animation: slice-jitter 0.28s steps(2) infinite;
+}
+
+.project-media.is-glitching::after {
+  clip-path: inset(58% 0 12% 0);
+  transform: translateX(6px);
+  filter: drop-shadow(3px 0 #2fffd4);
+  animation: slice-jitter 0.22s steps(2) infinite reverse;
+}
+
+@keyframes slice-jitter {
+  0% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(-4px);
+  }
+}
+
+html.js .about-chips .chip,
+html.js .edu-item {
+  opacity: 0;
+}
+
+html.js .skill-fill {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+html[data-reduced-motion] .about-chips .chip,
+html[data-reduced-motion] .edu-item,
+html[data-reduced-motion] .skill-fill {
+  opacity: 1;
+  transform: none;
+}
+
+/* Contact letter stagger helpers */
+.contact-heading .char {
+  will-change: transform, opacity;
+}

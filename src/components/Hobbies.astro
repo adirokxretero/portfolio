@@ -1,0 +1,574 @@
+---
+import { hobbies } from '../data/site';
+
+const n = hobbies.length;
+const radius = 38; // % from center
+
+const items = hobbies.map((hobby, i) => {
+  const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+  const x = 50 + Math.cos(angle) * radius;
+  const y = 50 + Math.sin(angle) * radius;
+  // flip labels on the left half so they don't collide with the ring
+  const flip = x < 48;
+  return {
+    ...hobby,
+    num: String(i + 1).padStart(2, '0'),
+    x,
+    y,
+    flip,
+  };
+});
+---
+
+<section class="section" id="more">
+  <div class="section-head">
+    <span class="section-num">06</span>
+    <span class="section-title">Beyond The Screen</span>
+  </div>
+
+  <div class="radar reveal">
+    <div class="radar-stage" id="radar-stage">
+      <svg class="radar-svg" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="radar-ring" cx="50" cy="50" r="38" />
+        <circle class="radar-ring radar-ring--soft" cx="50" cy="50" r="24" />
+        <circle class="radar-ring radar-ring--soft" cx="50" cy="50" r="12" />
+        <line
+          class="radar-beam"
+          id="radar-beam"
+          x1="50"
+          y1="50"
+          x2="50"
+          y2="12"
+          pathLength="1"
+        />
+      </svg>
+
+      <div class="radar-core" aria-hidden="true">
+        <span class="radar-core-label">ME</span>
+        <span class="radar-core-sub">signal</span>
+      </div>
+
+      {
+        items.map((item, i) => (
+          <button
+            class={`radar-node${i === 0 ? ' is-active' : ''}`}
+            style={`left:${item.x}%;top:${item.y}%`}
+            data-idx={i}
+            data-x={item.x}
+            data-y={item.y}
+            data-flip={item.flip ? 'true' : null}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            <span class="radar-dot" />
+            <span class="radar-label">{item.title}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <aside class="radar-panel glass-card">
+      <p class="radar-path">~/beyond-the-screen</p>
+      <p class="radar-num" id="radar-num">{items[0]!.num} / {String(n).padStart(2, '0')}</p>
+      <h3 class="radar-title display" id="radar-title">{items[0]!.title}</h3>
+      <p class="radar-text" id="radar-text">{items[0]!.text}</p>
+      <p class="radar-hint">Sweep the beam to lock on</p>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import { hobbies } from '../data/site';
+
+  const nodes = [...document.querySelectorAll('.radar-node')] as HTMLButtonElement[];
+  const beam = document.getElementById('radar-beam') as SVGLineElement | null;
+  const stage = document.getElementById('radar-stage') as HTMLElement | null;
+  const numEl = document.getElementById('radar-num')!;
+  const titleEl = document.getElementById('radar-title')!;
+  const textEl = document.getElementById('radar-text')!;
+  const panel = document.querySelector('.radar-panel') as HTMLElement;
+  const total = String(hobbies.length).padStart(2, '0');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(pointer: fine)').matches;
+
+  const GLITCH = '@#%&!?$X*+=-~^<>01';
+  const LOCK_RADIUS = 18; // soft magnetic pull zone
+  const SNAP_RADIUS = 12; // hard lock-on + panel swap
+
+  let activeIdx = 0;
+  let tracking = false;
+  let locked = false;
+  let targetX = 50;
+  let targetY = 12;
+  let beamX = 50;
+  let beamY = 12;
+  let scrambleTokens = new WeakMap<HTMLElement, number>();
+
+  function setBeam(x: number, y: number) {
+    if (!beam) return;
+    beam.setAttribute('x2', x.toFixed(2));
+    beam.setAttribute('y2', y.toFixed(2));
+  }
+
+  function nodePos(idx: number) {
+    const node = nodes[idx];
+    return { x: Number(node?.dataset.x ?? 50), y: Number(node?.dataset.y ?? 12) };
+  }
+
+  function nearest(cx: number, cy: number) {
+    let best = { idx: -1, dist: Infinity, x: 0, y: 0 };
+    nodes.forEach((node, i) => {
+      const x = Number(node.dataset.x);
+      const y = Number(node.dataset.y);
+      const dist = Math.hypot(cx - x, cy - y);
+      if (dist < best.dist) best = { idx: i, dist, x, y };
+    });
+    return best;
+  }
+
+  let rafId = 0;
+  function loop() {
+    beamX += (targetX - beamX) * (locked ? 0.28 : 0.18);
+    beamY += (targetY - beamY) * (locked ? 0.28 : 0.18);
+    setBeam(beamX, beamY);
+    if (Math.hypot(targetX - beamX, targetY - beamY) > 0.04) {
+      rafId = requestAnimationFrame(loop);
+    } else {
+      setBeam(targetX, targetY);
+      rafId = 0;
+    }
+  }
+  function kick() {
+    if (reduced) {
+      setBeam(targetX, targetY);
+      return;
+    }
+    if (!rafId) rafId = requestAnimationFrame(loop);
+  }
+
+  function aimAt(x: number, y: number) {
+    targetX = x;
+    targetY = y;
+    kick();
+  }
+
+  function scrambleText(el: HTMLElement, target: string, duration = 520) {
+    if (reduced || !target.trim()) {
+      el.textContent = target;
+      return;
+    }
+    const token = (scrambleTokens.get(el) ?? 0) + 1;
+    scrambleTokens.set(el, token);
+    const start = performance.now();
+    const frame = (now: number) => {
+      if (scrambleTokens.get(el) !== token) return;
+      const progress = Math.min((now - start) / duration, 1);
+      const resolved = Math.floor(progress * target.length);
+      el.textContent = target
+        .split('')
+        .map((ch, i) => {
+          if (i < resolved || ch === ' ' || ch === '/' || ch === '~') return ch;
+          return GLITCH[Math.floor(Math.random() * GLITCH.length)]!;
+        })
+        .join('');
+      if (progress < 1) requestAnimationFrame(frame);
+      else el.textContent = target;
+    };
+    requestAnimationFrame(frame);
+  }
+
+  function activate(idx: number, fromLock = false) {
+    const hobby = hobbies[idx];
+    const node = nodes[idx];
+    if (!hobby || !node) return;
+    const switched = activeIdx !== idx;
+    activeIdx = idx;
+
+    nodes.forEach((n, i) => {
+      n.classList.toggle('is-active', i === idx);
+      n.setAttribute('aria-pressed', String(i === idx));
+    });
+
+    // Snap beam to the node when not free-tracking, or when newly locked
+    if (!tracking || fromLock) {
+      const p = nodePos(idx);
+      aimAt(p.x, p.y);
+    }
+
+    const dot = node.querySelector('.radar-dot');
+    if (dot && !reduced && switched) {
+      dot.classList.remove('is-pulsing');
+      void (dot as HTMLElement).offsetWidth;
+      dot.classList.add('is-pulsing');
+    }
+
+    const num = `${String(idx + 1).padStart(2, '0')} / ${total}`;
+    panel.classList.toggle('is-locked', fromLock || tracking);
+
+    if (!switched) return;
+
+    if (reduced) {
+      numEl.textContent = num;
+      titleEl.textContent = hobby.title;
+      textEl.textContent = hobby.text;
+      return;
+    }
+
+    scrambleText(numEl, num, 360);
+    scrambleText(titleEl, hobby.title, 480);
+    scrambleText(textEl, hobby.text, 720);
+  }
+
+  if (stage && fine && !reduced) {
+    stage.addEventListener('mousemove', (e) => {
+      if (getComputedStyle(stage).display === 'flex') return;
+      const rect = stage.getBoundingClientRect();
+      const cx = ((e.clientX - rect.left) / rect.width) * 100;
+      const cy = ((e.clientY - rect.top) / rect.height) * 100;
+      tracking = true;
+      beam?.classList.add('is-tracking');
+
+      const near = nearest(cx, cy);
+
+      if (near.dist < SNAP_RADIUS) {
+        // Hard lock — beam sticks to the signal
+        locked = true;
+        stage.classList.add('is-locked');
+        beam?.classList.add('is-locked');
+        panel.classList.add('is-locked');
+        aimAt(near.x, near.y);
+        if (near.idx !== activeIdx) activate(near.idx, true);
+      } else if (near.dist < LOCK_RADIUS) {
+        // Soft magnetic pull toward the nearest signal
+        locked = false;
+        stage.classList.remove('is-locked');
+        beam?.classList.remove('is-locked');
+        const t = 1 - near.dist / LOCK_RADIUS;
+        const pull = t * t; // ease-in so pull strengthens near the node
+        aimAt(cx + (near.x - cx) * pull, cy + (near.y - cy) * pull);
+      } else {
+        locked = false;
+        stage.classList.remove('is-locked');
+        beam?.classList.remove('is-locked');
+        panel.classList.remove('is-locked');
+        aimAt(cx, cy);
+      }
+    });
+
+    stage.addEventListener('mouseleave', () => {
+      tracking = false;
+      locked = false;
+      stage.classList.remove('is-locked');
+      beam?.classList.remove('is-tracking', 'is-locked');
+      panel.classList.remove('is-locked');
+      const p = nodePos(activeIdx);
+      aimAt(p.x, p.y);
+    });
+  }
+
+  nodes.forEach((node) => {
+    const idx = Number(node.dataset.idx);
+    node.addEventListener('mouseenter', () => activate(idx, true));
+    node.addEventListener('focus', () => activate(idx, true));
+    node.addEventListener('click', () => activate(idx, true));
+  });
+
+  activate(0);
+  setBeam(beamX, beamY);
+</script>
+
+<style>
+  .radar {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: center;
+  }
+
+  .radar-stage {
+    position: relative;
+    aspect-ratio: 1;
+    max-width: 620px;
+    width: 100%;
+    margin-inline: auto;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255, 50, 50, 0.06), transparent 42%),
+      radial-gradient(circle at 50% 50%, rgba(47, 255, 212, 0.03), transparent 65%),
+      var(--bg-raised);
+    overflow: hidden;
+  }
+
+  .radar-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .radar-ring {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 0.25;
+  }
+
+  .radar-ring--soft {
+    stroke: var(--line);
+    stroke-dasharray: 1.2 1.2;
+  }
+
+  .radar-beam {
+    stroke: var(--accent);
+    stroke-width: 0.35;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 2px var(--accent));
+    opacity: 0.9;
+  }
+
+  .radar-beam.is-tracking {
+    stroke-width: 0.45;
+    opacity: 1;
+    filter: drop-shadow(0 0 3px var(--accent));
+  }
+
+  .radar-beam.is-locked {
+    stroke-width: 0.55;
+    stroke: var(--cyan);
+    filter: drop-shadow(0 0 4px var(--cyan));
+  }
+
+  .radar-stage.is-locked {
+    box-shadow: inset 0 0 40px rgba(47, 255, 212, 0.04);
+  }
+
+  .radar-core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    background: var(--bg);
+    box-shadow: 0 0 0 6px var(--accent-glow), 0 0 28px var(--accent-glow);
+    display: grid;
+    place-content: center;
+    text-align: center;
+    z-index: 2;
+  }
+
+  .radar-core-label {
+    font-family: var(--display);
+    font-size: 1.35rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .radar-core-sub {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .radar-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    z-index: 3;
+    padding: 0.65rem 0.5rem;
+    cursor: pointer;
+  }
+
+  .radar-node[data-flip] {
+    flex-direction: row-reverse;
+  }
+
+  .radar-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--ink-dim);
+    border: 1px solid var(--line-strong);
+    flex-shrink: 0;
+    transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+  }
+
+  .radar-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    white-space: nowrap;
+    transition: color 0.25s, text-shadow 0.25s;
+  }
+
+  .radar-node:hover .radar-label,
+  .radar-node.is-active .radar-label {
+    color: var(--ink);
+  }
+
+  .radar-node.is-active .radar-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px 2px var(--accent-glow), 0 0 22px 6px var(--accent-glow);
+    transform: scale(1.25);
+  }
+
+  .radar-node.is-active .radar-label {
+    color: var(--accent);
+    text-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .radar-dot.is-pulsing {
+    animation: radar-pulse 0.55s ease-out;
+  }
+
+  @keyframes radar-pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 transparent;
+    }
+    45% {
+      transform: scale(1.7);
+      box-shadow: 0 0 0 10px rgba(255, 50, 50, 0.15), 0 0 24px var(--accent-glow);
+    }
+    100% {
+      transform: scale(1.25);
+      box-shadow: 0 0 10px 2px var(--accent-glow);
+    }
+  }
+
+  .radar-panel {
+    padding: 1.75rem;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .radar-panel.is-locked {
+    border-color: color-mix(in srgb, var(--cyan) 45%, var(--line));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 18%, transparent),
+      0 0 28px rgba(47, 255, 212, 0.08);
+  }
+
+  .radar-panel.is-locked .radar-num,
+  .radar-panel.is-locked .radar-title {
+    font-variant-ligatures: none;
+  }
+
+  .radar-path {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin-bottom: 1.35rem;
+  }
+
+  .radar-num {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--cyan);
+    margin-bottom: 0.5rem;
+  }
+
+  .radar-title {
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    margin-bottom: 0.85rem;
+  }
+
+  .radar-text {
+    color: var(--ink-dim);
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  .radar-hint {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    transition: color 0.25s;
+  }
+
+  .radar-panel.is-locked .radar-hint {
+    color: var(--cyan);
+  }
+
+  @media (max-width: 860px) {
+    .radar {
+      grid-template-columns: 1fr;
+    }
+
+    .radar-stage {
+      max-width: 420px;
+    }
+
+    .radar-label {
+      font-size: 0.58rem;
+    }
+
+    .radar-core {
+      width: 60px;
+      height: 60px;
+    }
+
+    .radar-hint {
+      display: none;
+    }
+  }
+
+  @media (max-width: 520px) {
+    /* collapse to selectable chip list — radar gets cramped */
+    .radar-stage {
+      aspect-ratio: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem;
+      justify-content: center;
+    }
+
+    .radar-svg,
+    .radar-core {
+      display: none;
+    }
+
+    .radar-node {
+      position: static;
+      transform: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.45rem 0.85rem;
+      background: var(--bg);
+    }
+
+    .radar-node.is-active {
+      border-color: var(--accent);
+    }
+
+    .radar-node[data-flip] {
+      flex-direction: row;
+    }
+
+    .radar-label {
+      font-size: 0.68rem;
+      white-space: normal;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .radar-dot.is-pulsing {
+      animation: none;
+    }
+  }
+</style>

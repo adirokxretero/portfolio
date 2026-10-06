@@ -1,0 +1,98 @@
+<div id="cursor-dot" aria-hidden="true"></div>
+<div id="cursor-ring" aria-hidden="true"></div>
+
+<script>
+  const dot = document.getElementById('cursor-dot')!;
+  const ring = document.getElementById('cursor-ring')!;
+
+  const fine = matchMedia('(pointer: fine)').matches;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!fine || reduced) {
+    dot.remove();
+    ring.remove();
+  } else {
+    document.documentElement.classList.add('has-cursor');
+
+    let mx = innerWidth / 2;
+    let my = innerHeight / 2;
+    let dx = mx, dy = my, rx = mx, ry = my;
+
+    addEventListener('mousemove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+    });
+
+    document.querySelectorAll('a, button, .chip, .project, .hobby').forEach((el) => {
+      el.addEventListener('mouseenter', () => ring.classList.add('is-hover'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('is-hover'));
+    });
+
+    (function loop() {
+      dx += (mx - dx) * 0.25;
+      dy += (my - dy) * 0.25;
+      rx += (mx - rx) * 0.09;
+      ry += (my - ry) * 0.09;
+      dot.style.transform = `translate(${dx}px, ${dy}px) translate(-50%, -50%)`;
+      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    })();
+  }
+</script>
+
+<style is:global>
+  #cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    animation: cursor-glow 2s ease-in-out infinite;
+  }
+
+  #cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid rgba(255, 50, 50, 0.55);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: width 0.28s, height 0.28s, border-color 0.28s, box-shadow 0.28s;
+  }
+
+  #cursor-ring.is-hover {
+    width: 50px;
+    height: 50px;
+    border-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent-glow);
+  }
+
+  body.lm #cursor-ring {
+    border-color: rgba(216, 75, 75, 0.55);
+  }
+
+  @keyframes cursor-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 7px 3px rgba(255, 50, 50, 0.6), 0 0 20px 8px rgba(255, 50, 50, 0.22);
+    }
+    50% {
+      box-shadow: 0 0 16px 6px rgba(255, 50, 50, 0.9), 0 0 40px 16px rgba(255, 50, 50, 0.38);
+    }
+  }
+
+  @media (pointer: fine) {
+    html.has-cursor,
+    html.has-cursor a,
+    html.has-cursor button {
+      cursor: none;
+    }
+  }
+</style>
